@@ -1,0 +1,15 @@
+fastapi==0.109.0
+uvicorn[standard]==0.27.0
+python-multipart==0.0.6
+sqlalchemy==2.0.25
+pdfplumber==0.10.3
+PyPDF2==3.0.1
+python-docx==1.1.0
+Pillow==10.2.0
+pytesseract==0.3.10
+pdf2image==1.17.0
+groq==0.4.1
+python-dotenv==1.0.0
+pydantic==2.5.3
+aiofiles==23.2.1
+openpyxl==3.1.2
