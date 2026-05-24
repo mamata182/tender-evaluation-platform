@@ -6,22 +6,20 @@ import logging
 from app.config import settings
 from app.database import init_db
 from app.routers import tender, bidder, evaluation
+from app.routers.auth import router as auth_router
 
-# Configure logging
 logging.basicConfig(
     level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
 
-# Create FastAPI app
 app = FastAPI(
     title="AI Tender Evaluation Platform",
-    description="Automated tender eligibility evaluation using AI for Government of Karnataka",
-    version="1.0.0"
+    description="AI-Based Tender Evaluation and Eligibility Analysis",
+    version="2.0.0"
 )
 
-# CORS - Allow all origins for now (we can restrict later)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -31,7 +29,7 @@ app.add_middleware(
     expose_headers=["*"],
 )
 
-# Include routers
+app.include_router(auth_router)
 app.include_router(tender.router)
 app.include_router(bidder.router)
 app.include_router(evaluation.router)
@@ -39,42 +37,26 @@ app.include_router(evaluation.router)
 
 @app.on_event("startup")
 def startup():
-    """Run on application startup."""
-    logger.info("Starting Tender Evaluation Platform...")
-    
-    # Create directories
     os.makedirs(settings.UPLOAD_DIR, exist_ok=True)
     os.makedirs(settings.OUTPUT_DIR, exist_ok=True)
-    
-    # Initialize database
     init_db()
-    
     logger.info("Server started successfully!")
-    logger.info(f"GROQ API Key configured: {bool(settings.GROQ_API_KEY)}")
-    logger.info(f"LLM Model: {settings.LLM_MODEL}")
+    logger.info(f"GROQ configured: {bool(settings.GROQ_API_KEY)}")
+    logger.info(f"SECRET_KEY configured: {bool(settings.SECRET_KEY)}")
 
 
 @app.get("/")
 def home():
-    """Home endpoint - returns API status."""
     return {
         "message": "AI Tender Evaluation Platform",
-        "version": "1.0.0",
+        "version": "2.0.0",
         "status": "running",
-        "ai_provider": "Groq (Llama 3.3 70B)",
-        "docs": "/docs",
-        "endpoints": {
-            "tender_upload": "/api/tender/upload",
-            "bidder_upload": "/api/bidder/upload",
-            "evaluate": "/api/evaluation/evaluate",
-            "api_docs": "/docs"
-        }
+        "docs": "/docs"
     }
 
 
 @app.get("/health")
 def health():
-    """Health check endpoint for monitoring."""
     return {
         "status": "healthy",
         "ai_configured": bool(settings.GROQ_API_KEY),

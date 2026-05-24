@@ -3,6 +3,39 @@ from typing import List, Optional, Dict, Any
 from datetime import datetime
 
 
+# ===== AUTH SCHEMAS =====
+
+class UserSignup(BaseModel):
+    full_name: str
+    email: str
+    password: str
+    confirm_password: str
+
+
+class UserLogin(BaseModel):
+    email: str
+    password: str
+
+
+class UserOut(BaseModel):
+    id: int
+    full_name: str
+    email: str
+    role: str
+    is_active: bool
+
+    class Config:
+        from_attributes = True
+
+
+class TokenOut(BaseModel):
+    access_token: str
+    token_type: str
+    user: UserOut
+
+
+# ===== TENDER SCHEMAS =====
+
 class CriterionSchema(BaseModel):
     id: Optional[int] = None
     criterion_text: str
@@ -30,6 +63,8 @@ class TenderResponse(BaseModel):
         from_attributes = True
 
 
+# ===== BIDDER SCHEMAS =====
+
 class BidderResponse(BaseModel):
     id: int
     name: str
@@ -41,6 +76,8 @@ class BidderResponse(BaseModel):
     class Config:
         from_attributes = True
 
+
+# ===== EVALUATION SCHEMAS =====
 
 class EvaluationResponse(BaseModel):
     id: int

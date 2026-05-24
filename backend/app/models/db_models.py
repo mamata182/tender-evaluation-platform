@@ -8,6 +8,20 @@ from datetime import datetime
 Base = declarative_base()
 
 
+# ============ USER MODEL (NEW) ============
+class User(Base):
+    __tablename__ = "users"
+
+    id = Column(Integer, primary_key=True, index=True)
+    full_name = Column(String(200), nullable=False)
+    email = Column(String(200), unique=True, index=True, nullable=False)
+    hashed_password = Column(String(500), nullable=False)
+    is_active = Column(Boolean, default=True)
+    role = Column(String(50), default="user")
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+
+# ============ TENDER MODEL ============
 class Tender(Base):
     __tablename__ = "tenders"
 

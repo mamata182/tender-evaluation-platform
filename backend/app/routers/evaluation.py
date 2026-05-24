@@ -36,12 +36,10 @@ async def run_evaluation(
     print(f"Bidder IDs received: {bidder_ids}")
     print("=" * 80)
 
-    # Get tender
     tender = db.query(Tender).filter(Tender.id == tender_id).first()
     if not tender:
         raise HTTPException(status_code=404, detail="Tender not found")
 
-    # Get criteria
     criteria = db.query(Criterion).filter(
         Criterion.tender_id == tender_id
     ).all()
@@ -54,8 +52,7 @@ async def run_evaluation(
 
     print(f"Criteria found: {len(criteria)}")
 
-    # If frontend accidentally sends empty bidder_ids,
-    # evaluate all uploaded bidders instead of returning 0 results.
+    # If frontend sends empty bidder_ids, evaluate all uploaded bidders
     if not bidder_ids:
         bidders = db.query(Bidder).all()
         bidder_ids = [b.id for b in bidders]
@@ -67,7 +64,7 @@ async def run_evaluation(
             detail="No bidders found. Please upload bidders before evaluation."
         )
 
-    # Delete old evaluations for this tender to avoid duplicate saved results
+    # Delete old evaluations for this tender to avoid duplicate results
     old_evaluations = db.query(Evaluation).filter(
         Evaluation.tender_id == tender_id
     ).all()
@@ -114,8 +111,7 @@ async def run_evaluation(
         print(f"Bidder status: {bidder.status}")
         print(f"Has extracted data: {bool(bidder.extracted_data)}")
 
-        # IMPORTANT:
-        # Do NOT skip bidder even if extracted_data is empty.
+        # Do not skip bidder even if extracted_data is empty.
         # If extraction failed, evaluation engine marks criteria as uncertain.
         bidder_extraction = bidder.extracted_data or {}
 
@@ -132,7 +128,6 @@ async def run_evaluation(
             f"Uncertain: {eval_result['criteria_uncertain']}"
         )
 
-        # Save evaluation summary
         evaluation = Evaluation(
             tender_id=tender_id,
             bidder_id=bidder.id,
@@ -149,7 +144,6 @@ async def run_evaluation(
         db.commit()
         db.refresh(evaluation)
 
-        # Save criterion-level evaluation details
         for ce_data in eval_result["criterion_evaluations"]:
             ce = CriterionEvaluation(
                 evaluation_id=evaluation.id,
@@ -239,11 +233,6 @@ async def get_results(tender_id: int, db: Session = Depends(get_db)):
 
 @router.get("/debug/{tender_id}")
 async def debug_evaluation_data(tender_id: int, db: Session = Depends(get_db)):
-    """
-    Debug endpoint to check tender, criteria, bidders, and evaluations.
-    Useful when deployed output shows 0 results.
-    """
-
     tender = db.query(Tender).filter(Tender.id == tender_id).first()
     criteria = db.query(Criterion).filter(Criterion.tender_id == tender_id).all()
     bidders = db.query(Bidder).all()
@@ -271,10 +260,6 @@ async def debug_evaluation_data(tender_id: int, db: Session = Depends(get_db)):
 
 @router.get("/report/{tender_id}/download")
 async def download_evaluation_report(tender_id: int, db: Session = Depends(get_db)):
-    """
-    Download consolidated evaluation report as a text file.
-    """
-
     tender = db.query(Tender).filter(Tender.id == tender_id).first()
 
     if not tender:
